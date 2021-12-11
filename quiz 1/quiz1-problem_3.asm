@@ -48,7 +48,7 @@ loop:
 							# x' = n/x
 	nop
 
-    	add.s   $f4,$f3,$f4      				# adds $f3 (x) into $f4 (n/x) and puts the result into $f4   	    
+    	add.s   $f4,$f3,$f4      			# adds $f3 (x) into $f4 (n/x) and puts the result into $f4   	    
 							# x' = x + n/x
 	
    	div.s   $f3,$f4,$f2         	    		# divides $f4 (x + n/x) by $f2 (2.0) and puts the result into $f3
@@ -73,7 +73,7 @@ loop:
     	c.lt.s  $f8,$f10            	    		# is $f8 (|x^2 - n|) less than $f10 (1.0 x 10^-5)?
     	nop
 
-    	bc1t    done                	   		 # if so, branch to done
+    	bc1t    done                	   		# if so, branch to done
     	nop
 
     	j       loop               	        	# if $f8 is larger than $f10, 
