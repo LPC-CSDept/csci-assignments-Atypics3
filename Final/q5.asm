@@ -8,11 +8,34 @@
 ##
 
     .data
+nums:       .word   3
+inputMsg:   .asciiz "Enter 3 digits: \n"
+resultMsg:  .asciiz "The result is: \n"
     .text
     .globl main
 
-main:
+main:                    
+    ori $t1, $zero, 100             # $t1 = counter
+    lw  $t0, numOfDigits            # $t0 = (3) digits to be inputted 
+    lui $t2, 0xffff                 
+
+    la  $a0, inputMsg               # loading in inputMsg
+    li  $v0, 4                     
+    syscall                         # displaying inputMsg
+
+gettingInput:
 
 
-    li  $v0, 10
+
+processingInput:
+
+
+
+
+printResult:
+    la  $a0, resultMsg              # loading in resultMsg
+    li  $v0, 4                      # displaying resultMsg
+    syscall
+
+    li  $v0, 10                     # program ends
     syscall
