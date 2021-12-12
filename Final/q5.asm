@@ -14,17 +14,25 @@ resultMsg:  .asciiz "The result is: \n"
     .text
     .globl main
 
-main:                    
-    ori $t1, $zero, 100             # $t1 = counter
-    lw  $t0, numOfDigits            # $t0 = (3) digits to be inputted 
-    lui $t2, 0xffff                 
+main:           
+    lw      $t0, numOfDigits            # $t0 = (3) digits to be inputted          
+    ori     $t1, $zero, 100             # $t1 = counter
+    lui     $t2, 0xffff                 # $t2 = upper immediate
 
-    la  $a0, inputMsg               # loading in inputMsg
-    li  $v0, 4                     
-    syscall                         # displaying inputMsg
+    la      $a0, inputMsg               # loading in inputMsg
+    li      $v0, 4                     
+    syscall                             # displaying inputMsg
+
 
 gettingInput:
+    lw      $t3, 0($t2)                 # loading receiver control register
+    andi    $t3, $t3, 0x0001            # flipping all bits except LSB to see
+                                        # if the receiver control register is ready or not.
 
+    beq     $t3, $zero, gettingInput    # if $t3 != 0, go to gettingInput
+                                        # if not ready, loop through gettingInput until ready
+    nop
+    lw      $s0, 4($t2)                 # loading receiver data register; reading in data with it
 
 
 processingInput:
