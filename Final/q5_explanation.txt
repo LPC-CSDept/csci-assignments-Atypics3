@@ -1,0 +1,27 @@
+Direction
+
+    Use one IDE that supports Github
+        https://vscode.dev (Links to an external site.) 
+        VS code, Code Block, and so on.
+        Browser version of VS code
+    Make the “Final” folder
+    Periodic Commit 
+        After major changes
+        Every 10 minutes
+        When you fix Errors (how to fix)
+    The purpose of the commit
+        to see how you make the program. 
+        If there is no change history, you may not get full scores.
+
+Code Explanation:
+
+    It does not mean the comments
+    The comments on the source will not be accepted as an explanation and description
+    Describe the outline of your algorithm based on your assembly code
+        explain the details of how it works(like a software development document)
+        show the purpose of each register at the pseudo-code level 
+        draw the memory layout if it is required
+        show(draw) the bit representation if you use a certain part of the register
+        explain all about your code 
+        show the test results with the MULTIPLE test data set.
+

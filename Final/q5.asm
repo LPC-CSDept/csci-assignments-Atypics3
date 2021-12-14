@@ -36,10 +36,21 @@ gettingInput:
 
 
 processingInput:
+    sub     $s0, $s0, 48                # getting digit in decimal
+    sub     $t0, $t0, 1                 # decrementing counter
 
+    mul     $s0, $s0, $t1               # moving value into correct place
+    add     $s1, $s1, $s0               # adding current input into total
+    div     $t1, $t1, 10
+                                        # example if user inputs 123:
+                                        # $t0 = 3 --> ($s0 = 0 0 3 * 100) ---> $s0 = _ _ 3, (0 + 0 + 3)
+                                        # $t0 = 2 --> ($s0 = 0 2 0 * 100) ---> $s0 = _ 2 3, (0 + 20 + 3)
+                                        # $t0 = 1 --> ($s0 = 1 0 0 * 100) ---> $s0 = 1 2 3, (100 + 20 + 3)                                  
+    nop
 
-
-
+    beq     $t0, $zer0, printResult     # when $t1 == 0, go to printResult
+    nop
+    
 printResult:
     la  $a0, resultMsg              # loading in resultMsg
     li  $v0, 4                      # displaying resultMsg
