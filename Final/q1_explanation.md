@@ -41,7 +41,7 @@ The registers and settings that are going to be used are as follows:
 ## Other Registers:
 
 - `$a0` = argument register to be used for syscall and holds the final result.
-- `$v0` = expression evaluation reguster to be used for syscall.
+- `$v0` = expression evaluation register to be used for syscall.
   <br/><br/>
 
 ## Settings:
@@ -229,20 +229,20 @@ After we get the result that we expect, the program is then called to end.
 
 ### Test case 1:
 
-![result1](/Final\q1_result1.PNG) <br/> <br/>
+![result1](/Final/q1_result1.PNG) <br/> <br/>
 In result 1, we inputted `123` and got `123` back. <br/>
 This functions as we expected it to.
 <br/><br/>
 
 ### Test case 2:
 
-![result2](/Final\q1_result2.PNG) <br/> <br/>
+![result2](/Final/q1_result2.PNG) <br/> <br/>
 In result 1, we inputted `981` and got `981` back. <br/>
 This functions as we expected it to.
 <br/><br/>
 
 ### Test case 3:
 
-![result3](/Final\q1_result3.PNG) <br/> <br/>
+![result3](/Final/q1_result3.PNG) <br/> <br/>
 In result 1, we inputted `333` and got `333` back. <br/>
 This functions as we expected it to.
