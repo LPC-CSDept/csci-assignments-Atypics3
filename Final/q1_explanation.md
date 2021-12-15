@@ -22,7 +22,7 @@ Final Question 1 - Memory Mapped I/O
 This is a `.asm` file that will take three digits from the user and output the same three digits back. <br/>
 This is done by using memory mapped I/O. <br/>
 Specifically, this will use the .data segment and the stack segment in order to achieve the purpose of the problem. <br/>
-The registers that are going to be used are as follows:
+The registers and settings that are going to be used are as follows:
 
 <br /> <br />
 
@@ -43,6 +43,15 @@ The registers that are going to be used are as follows:
 - `$a0` = argument register to be used for syscall and holds the final result.
 - `$v0` = expression evaluation reguster to be used for syscall.
   <br/><br/>
+
+## Settings:
+
+- Bare Machine `OFF`
+- Enable Delayed Branches `OFF`
+- Enable Mapped IO `ON`
+- Accept Pseudo instructions `ON`
+- Enable Delayed Loads `OFF`
+- Load Exception Handler `OFF`
 
 # ALGORITHM: <br/>[Back to Top](#description)
 
