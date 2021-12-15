@@ -8,7 +8,7 @@
 ##
 
     .data
-nums:       .word   3
+numOfDigits:       .word   3
 inputMsg:   .asciiz "Enter 3 digits: \n"
 resultMsg:  .asciiz "The result is: \n"
     .text
@@ -40,6 +40,7 @@ processingInput:
     sub     $t0, $t0, 1                 # decrementing counter
 
     mul     $s0, $s0, $t1               # moving value into correct place
+    nop
     add     $s1, $s1, $s0               # adding current input into total
     div     $t1, $t1, 10
                                         # example if user inputs 123:
@@ -48,13 +49,18 @@ processingInput:
                                         # $t0 = 1 --> ($s0 = 1 0 0 * 100) ---> $s0 = 1 2 3, (100 + 20 + 3)                                  
     nop
 
-    beq     $t0, $zer0, printResult     # when $t1 == 0, go to printResult
+    beq     $t0, $zero, printResult     # when $t0 == 0 (if ready), go to printResult
     nop
-    
+
+    b       gettingInput                # if $t1 != 0 (if not ready), go back to gettingInput
 printResult:
-    la  $a0, resultMsg              # loading in resultMsg
-    li  $v0, 4                      # displaying resultMsg
+    la      $a0, resultMsg              # loading in resultMsg
+    li      $v0, 4                      # displaying resultMsg
     syscall
 
-    li  $v0, 10                     # program ends
+    li      $v0, 1                      # displaying inputted value
+    move    $a0, $s1                    # moving value in $s1 into $a0
+    syscall
+
+    li      $v0, 10                     # program ends
     syscall
