@@ -20,7 +20,7 @@ Final Question 2 - Interrupted I/O
   <br/><br/>
 
 This is a `.asm` file that will take the user inputted character and continously print it onto the console screen until 'q' is typed and entered <br/>
-This is done by using memory mapped & Interrupt I/O. <br/>
+This is done by using Memory-Mapped I/O & Interrupted I/O. <br/>
 Specifically, this will use the stack segment and the kernel text segment in order to achieve the purpose of the problem. <br/>
 The registers and settings that are going to be used are as follows:
 
@@ -28,20 +28,18 @@ The registers and settings that are going to be used are as follows:
 
 ## Temporary Registers (`$t__`):
 
-- `$t0` = digits to be inputted (3 by default since we're inputting only 3 digits).
-- `$t1` = counter for counting digits (set to 100 by default due to 3 digits being inputted).
-- `$t2` = the upper immediate of 0xFFFF that will be used in the program.
-- `$t3` = a temporary register.
+- `$t0` = the upper immediate.
+- `$t4` = holds the value that is read from the status register.
+- `$t5` = holds the value that is read from the cause register.
 
 ## Saved Registers (`$s__`):
 
-- `$s0` = used to hold the data for the receiver register and is also used in the algorithm to move the inputted value into the correct place
-- `$s1` = used to add the value in $s0 to get the total.
+- `$s0` = holds `q` (or 133 in ASCII). This is used to stop the program when the user types in 'q' in the console.
 
 ## Other Registers:
 
-- `$a0` = argument register to be used for syscall and holds the final result.
-- `$v0` = expression evaluation register to be used for syscall.
+- `$a0` = argument register to be used for reading/writing from the cause and status registers. It is also used to get the appropriate code for syscalls.
+- `$v0` = holds the value of `stackPtr1` and other variables (such as the upper immediate or to assist in syscalls) in the program.
   <br/><br/>
 
 ## Settings:
@@ -51,51 +49,57 @@ The registers and settings that are going to be used are as follows:
 - Enable Mapped IO `ON`
 - Accept Pseudo instructions `ON`
 - Enable Delayed Loads `OFF`
-- Load Exception Handler `OFF`
+- Load Exception Handler `ON`
 
 # ALGORITHM: <br/>[Back to Top](#description)
 
-- Using C++, the algorithm for the program goes like this:
+- Using C++ and pseudocode, the algorithm for the program goes like this:
 
 ```c++
-// loading receiver control/data register(s) are omitted due to it not needed in C++
- int t0 = 3; (digits to be inputted)
+// loading receiver control/data register(s) and other instructions are omitted due to it not needed in C++
+main:
+int q = 113; // value of 'q' in ASCII
+int upperImmed = 65535;     // 0xFFFF in decimal
+int value = 0;
 
-int t1 = 100; (counter)
-
-int t2 = 65535; (upper immediate)
-
-string inputMsg = "Enter 3 digits: \n";
-
-cout << inputMsg;
-
-cin >> t0;
-int t3 = 1; //0x0001
-t3 = t3
 do {
-
+    cin >> value;
 }
-while (t3 != 0)
+while (value != q)
 
-then go to next subroutine
+contInput:
+    stays here for cont. input until 'q' is pressed
 
-int s0 = t2;
-s0 = s0 - 48;
-t0--;
+/** KERNEL TEXT SECTION **/
+    int stackPtr1 = 0, stackPtr2 = 0;
+continue:
+    moves from coprocessor 0
+    get exception code field
+    get exception code from field
+    if (a0 != 0)
+        goto kdone
+    else
+        continue
 
-s0 = s0 \* t1;
+    stackPtr = upperImmed;
+    cin >> value;               // get input key and loaded in receiver data reg.
+    if (a0 != s0)
+        goto printChars;
+    else
+        continue;
 
-int s1 = s1 + s0;
+    exit(0);
 
-t1 = t1 / 10;
+printChars:
+    print out value
 
-while (t0 != zero)
-then go to next subroutine
-
-cout << resultMsg;
-cout << s1;
-
-exit(0);
+kdone:
+    restore stackPtr1 and stackPtr2
+    clear cause reg.
+    clear status reg.
+    enable interrupts in kernel reg.
+    write back to status reg.
+    return back to EPC
 ```
 
 <br /> <br />
@@ -105,19 +109,21 @@ exit(0);
 ### header:
 
 ```x86asm
+    .kdata
+stackPtr1:          .word 10            # acts as a stack pointer
+stackPtr2:          .word 11            # acts as a stack pointer
     .data
-numOfDigits:       .word   3
-inputMsg:   	   .asciiz "Enter 3 digits: \n"
-resultMsg:  	   .asciiz "The result is: \n"
     .text
     .globl main
 ```
 
-In the data segment of the header, we see 3 things in it:
+In the kernel data segment of the header, we see 2 things in it:
 
-- numOfDigits, a integer variable which holds the number of digits
-- inputMsg, a string variable which outputs the input message
-- resultMsg, a string variable which outputs the result message
+- `stackPtr1`, a integer variable that acts as a pointer without needing to be in the stack segment
+- `stackPtr2`, a integer variable that acts as a pointer without needing to be in the stack segment
+  <br/>
+  This is done just in case the interrupt handler mistakenly is triggered because of a bad value of the stack pointer (from the actual stack data segment), if we were to use it.
+  <br/>
   The text segment and `globl main` are set by default.
   <br /> <br />
 
@@ -125,124 +131,134 @@ In the data segment of the header, we see 3 things in it:
 
 ```x86asm
 main:
-    lw      $t0, numOfDigits            # $t0 = (3) digits to be inputted
-    ori     $t1, $zero, 100             # $t1 = counter
-    lui     $t2, 0xffff                 # $t2 = upper immediate
+    li      $s0, 113                        # $s0 = 'q' (133 in ASCII)
+    mfc0    $a0, $t4                        # read from the status reg.
+    ori     $a0, 0xff11                     # enable all interrupts
+    mtc0    $a0, $t4                        # write back to the status reg.
 
-    la      $a0, inputMsg               # loading in inputMsg
-    li      $v0, 4
-    syscall                             # displaying inputMsg
+    lui     $t0, 0xFFFF                     # $t0 = 0xFFFF0000
+    ori     $a0, $zero, 2                   # enable keyboard interrupt
+    sw      $a0, 0($t0)                     # write back to 0xFFFF0000, stored in receiver control data reg.
 
 ```
 
-In the `main` routine of the program, we set some values to some registers:
+In the `main` routine of the program, we do some things:
 
-- $t0 = the digits to be inputted (3, in this case).
-- $t1 = the counter, set to 100.
-- $t2 = the upper immediate.
-  Then, we load in inputMsg and output it into the console.
+- `$s0` = the ASCII value of 'q'.
+- `$t0` = the upper immediate
+  After the first two instructions, we use `ori $a0, 0xff11` to enable all interrupts. This makes it so that the program can become interrupted due to some error, in which case QTSpim would point it out. <br/>
+  For this program, we will be using it to stop continous input. <br/>
+  We write back to the status register (`$t4`) and make `$t0` have the value of the upper immediate.
+  Then, we enable keyboard interrupt and make the program write back to `0xFFFF0000`, which the inputted value is stored in the receiver control register. <br/>
   <br /> <br />
 
 ### gettingInput:
 
 ```x86asm
-gettingInput:
-    lw      $t3, 0($t2)                 # loading receiver control register
-    andi    $t3, $t3, 0x0001            # flipping all bits except LSB to see
-                                        # if the receiver control register is ready or not.
-
-    beq     $t3, $zero, gettingInput    # if $t3 != 0, go to gettingInput
-                                        # if not ready, loop through gettingInput until ready
-    nop
-    lw      $s0, 4($t2)                 # loading receiver data register; reading in data with it
+contInput:
+    j   contInput                           # stays here for continuous input
 
 ```
 
-In the `gettingInput` subroutine, we first load in the receiver control register(RCR) in order to receive input from the user. <br/>
-Then we flip all the bits in $t3 except the LSB if the RCR is ready or not. <br/>
-If it is ready, then go to the `processingInput` subroutine. If not, loop through `gettingInput` until it is.
+In the `contInput` subroutine, the program will use this to continuously read in inputs until 'q' is pressed. In which case, the program breaks out of the infinite loop.
 <br /> <br />
 
-### processingInput
+### Kernel Text Section & continue:
 
 ```x86asm
-processingInput:
-    sub     $s0, $s0, 48                # getting digit in decimal
-    sub     $t0, $t0, 1                 # decrementing counter
+    # KERNEL TEXT SECTION
+    # -------------------
+	.ktext  0x80000180     		            # kernel code starts here
+    sw      $v0, stackPtr1                  # $v0 = stackPtr1
+    sw      $a0, stackPtr2                  # $a0 = stackPtr2
 
-    mul     $s0, $s0, $t1               # moving value into correct place
-    nop
-    add     $s1, $s1, $s0               # adding current input into total
-    div     $t1, $t1, 10
+continue:
+    mfc0    $k0, $t5                        # move from coprocessor 0, gets the cause register
+    srl     $a0, $k0, 2                     # shift left $k0 by 2 to get the exception code field and put the result into $a0
+    andi    $a0, $a0, 0x1f                  # get the exception code, $a0 = exception code only
+    bne     $a0, $zero, kdone               # exception code 0 = input/output;
+                                            # if $a0 (stackPtr2) != 0, go to kdone to finish up.
+                                            # if $a0 (stackPtr2) = 0, then keep getting inputs
 
-    # example if user inputs 123:
-    # $t0 = 3 --> ($s0 = 0 0 3 * 100) ---> $s0 = _ _ 3, (0 + 0 + 3)
-    # $t0 = 2 --> ($s0 = 0 2 0 * 100) ---> $s0 = _ 2 3, (0 + 20 + 3)
-    # $t0 = 1 --> ($s0 = 1 0 0 * 100) ---> $s0 = 1 2 3, (100 + 20 + 3)
+    lui     $v0, 0xFFFF                     # $v0 (stackPtr1) = 0xFFFF0000
+    lw      $a0, 4($v0)                     # get the input key; loaded in receiver data reg.
+    bne     $a0, $s0, printChars            # branch to printChars if not 'q'.
+                                            # if 'q', continue on below.
 
-    nop
-
-    beq     $t0, $zero, printResult     # when $t0 == 0 (if ready), go to printResult
-    nop
-
-    b       gettingInput                # if $t1 != 0 (if not ready), go back to gettingInput
+    li      $v0, 10                         # program ends
+    syscall
 ```
 
-The `processingInput` subroutine is where all the calculations are: <br/>
+In this section of the program, we declare the kernel text section and the `continue` subroutine.
 
-- We can see that `$s0` is decreased by 48 in order to get the digit in decimal form.
-- `$t0` (the counter) is then decremented by 1.
-- `s0` is then multiplied by `$t1` (the amount of digits inputted) to move the digit into its correct place.
-- `$s1` is added by `$s0` and itself in order to add the current digit (`$s0`) into the total.
-- `$t1` is then divided by 10 to shift its place right by 1 to get the next value place (which in this case, can only be the second or first place value). <br/>
-  A visualization of this process is given in the code block above. <br/>
-- A loop is then implemented which says that:
-  - if `$t0 == 0`, then go to printResult.
-  - if `$t0 != 0`, then branch to `gettingInput`. <br/>In other words, keep branching back to `gettingInput` again until there are no more digits to process.
+- `kernel text section`:
+
+  - We take `stackPtr1` and `stackPtr2` and assign their values to `$v0` and `$a0` respectively.
+    <br/>
+
+- `continue:` <br/>
+  - We first get the cause register from `$t5` and put it in `$k0`. <br/>
+    Then we shift `$k0` left by 2 to get the exception code field and put the result into `$a0`. <br/>
+    The exception code is obtained and its value is put into `$a0`. <br/>
+    We then branch to `kdone` if $a0 (or stackPtr2) != 0 to process inputs. If `$a0`= 0, then we will keep getting said inputs. <br/> <br/> We set `$v0`(or stackPtr1) to 0xFFFF and get the input key by loading stackPtr1's address into stackPtr2. <br/>
+  - We make another branch to `printChars` if $a0 != $s0 (in other words, if stackPtr1 isn't the same as stackPtr2). <br/>
+    If not, then continue to the next line. <br/>
+    The program ends after since there are no more inputs to be read and all of them are processed already.
 
 <br /> <br />
 
-### printResult
+### printChars:
 
 ```x86asm
-printResult:
-    la      $a0, resultMsg              # loading in resultMsg
-    li      $v0, 4                      # displaying resultMsg
-    syscall
-
-    li      $v0, 1                      # displaying inputted value
-    move    $a0, $s1                    # moving value in $s1 into $a0
-    syscall
-
-    li      $v0, 10                     # program ends
-    syscall
+printChars:
+    li      $v0, 11                         # prints the ASCII char.
+    syscall                                 # corresponding to contents of low-order bytes
 
 ```
 
-Finally, `printResult` prints out whatever `resultMsg` has and gets the value that we processed in `processingInput`. <br/>
-This is done by using `move $a0, $s1`, which moves the value in `$s1` into `$a0`. It is then called using `syscall`. <br/> <br/>
-By the end of this, we should always expect to get the value that we inputted earlier, assuming that three digits are inputted. <br/>
-After we get the result that we expect, the program is then called to end.
+In `printChars`, All characters with the exception of `q` will be outputted on the console and will keep on doing so until `q` is inputted.
 <br /> <br />
+
+### kdone:
+
+```x86asm
+kdone:
+    lw      $v0, stackPtr1                  # restoring stackPtr1 ($v0)
+    lw      $a0, stackPtr2                  # restoring stackPtr2 ($a0)
+
+    mtc0    $zero, $t5                      # clearing cause reg. ($t5)
+    mfc0    $k0, $t4                        # setting status reg. ($t4)
+
+    ori     $k0, 0x11                       # enabling interrupts in kernel reg.
+    mtc0    $k0, $t4                       # writing back to status reg.
+
+    eret                                    # return back to EPC (Exception Program Counter)
+```
+
+After all reading and processing have been finished, we have to restore stackPtr1 (`$v0`) and stackPtr2 (`a0`). <br/>
+We also need to clear the cause register (`$t5`), set the status register (`$t4`), enable all interrupts in the kernel register (`$k0`), and write back to the status register (`k0`). <br/>
+Finally, we return back to the Exception Program Counter after the instructions above have been executed.
+
+<br/> <br/>
 
 # RESULTS: <br/>[Back to Top](#description)
 
 ### Test case 1:
 
-![result1](/Final/q1_result1.PNG) <br/> <br/>
-In result 1, we inputted `123` and got `123` back. <br/>
-This functions as we expected it to.
+![result1](/Final/q2_result1.PNG) <br/> <br/>
+In result 1, we inputted `123` and `abc` and got `123` and `abc` back. <br/>
+This program functions as we expected it to since the program took in all the inputs that we gave it and it ended after we pressed `q`.
 <br/><br/>
 
 ### Test case 2:
 
-![result2](/Final/q1_result2.PNG) <br/> <br/>
-In result 1, we inputted `981` and got `981` back. <br/>
-This functions as we expected it to.
+![result2](/Final/q2_result2.PNG) <br/> <br/>
+In result 2, we inputted `hello` and `world` and got `hello` and `world` back. <br/>
+This program functions as we expected it to since the program took in all the inputs that we gave it and it ended after we pressed `q`.
 <br/><br/>
 
 ### Test case 3:
 
-![result3](/Final/q1_result3.PNG) <br/> <br/>
-In result 1, we inputted `333` and got `333` back. <br/>
-This functions as we expected it to.
+![result3](/Final/q2_result3.PNG) <br/> <br/>
+In result 3, we inputted a short message and got the same message back as the output. <br/>
+This program functions as we expected it to since the program took in all the inputs that we gave it and it ended after we pressed `q`.

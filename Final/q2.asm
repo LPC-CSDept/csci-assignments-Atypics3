@@ -39,7 +39,7 @@ continue:
     srl     $a0, $k0, 2                     # shift left $k0 by 2 to get the exception code field and put the result into $a0
     andi    $a0, $a0, 0x1f                  # get the exception code, $a0 = exception code only
     bne     $a0, $zero, kdone               # exception code 0 = input/output;
-                                            # if $a0 (stackPtr2) != 0, go to kdone to process inputs. 
+                                            # if $a0 (stackPtr2) != 0, go to kdone to finish up. 
                                             # if $a0 (stackPtr2) = 0, then keep getting inputs
 
     lui     $v0, 0xFFFF                     # $v0 (stackPtr1) = 0xFFFF0000

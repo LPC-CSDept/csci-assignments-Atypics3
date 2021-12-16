@@ -55,7 +55,7 @@ The registers and settings that are going to be used are as follows:
 
 # ALGORITHM: <br/>[Back to Top](#description)
 
-- Using C++, the algorithm for the program goes like this:
+- Using C++ and pseudocode, the algorithm for the program goes like this:
 
 ```c++
 // loading receiver control/data register(s) are omitted due to it not needed in C++
@@ -115,9 +115,9 @@ resultMsg:  	   .asciiz "The result is: \n"
 
 In the data segment of the header, we see 3 things in it:
 
-- numOfDigits, a integer variable which holds the number of digits
-- inputMsg, a string variable which outputs the input message
-- resultMsg, a string variable which outputs the result message
+- `numOfDigits`, a integer variable which holds the number of digits
+- `inputMsg`, a string variable which outputs the input message
+- `resultMsg`, a string variable which outputs the result message
   The text segment and `globl main` are set by default.
   <br /> <br />
 
@@ -137,9 +137,9 @@ main:
 
 In the `main` routine of the program, we set some values to some registers:
 
-- $t0 = the digits to be inputted (3, in this case).
-- $t1 = the counter, set to 100.
-- $t2 = the upper immediate.
+- `$t0` = the digits to be inputted (3, in this case).
+- `$t1` = the counter, set to 100.
+- `$t2` = the upper immediate.
   Then, we load in inputMsg and output it into the console.
   <br /> <br />
 
@@ -237,12 +237,12 @@ This functions as we expected it to.
 ### Test case 2:
 
 ![result2](/Final/q1_result2.PNG) <br/> <br/>
-In result 1, we inputted `981` and got `981` back. <br/>
+In result 2, we inputted `981` and got `981` back. <br/>
 This functions as we expected it to.
 <br/><br/>
 
 ### Test case 3:
 
 ![result3](/Final/q1_result3.PNG) <br/> <br/>
-In result 1, we inputted `333` and got `333` back. <br/>
+In result 3, we inputted `333` and got `333` back. <br/>
 This functions as we expected it to.
