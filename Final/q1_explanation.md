@@ -53,7 +53,9 @@ The registers and settings that are going to be used are as follows:
 - Enable Delayed Loads `OFF`
 - Load Exception Handler `OFF`
 
-# ALGORITHM: <br/>[Back to Top](#description)
+# ALGORITHM:
+
+<br/>[Back to Top](#description)
 
 - Using C++ and pseudocode, the algorithm for the program goes like this:
 
@@ -100,7 +102,9 @@ exit(0);
 
 <br /> <br />
 
-# EXPLANATION: <br/>[Back to Top](#description)
+# EXPLANATION:
+
+<br/>[Back to Top](#description)
 
 ### header:
 
@@ -225,7 +229,9 @@ By the end of this, we should always expect to get the value that we inputted ea
 After we get the result that we expect, the program is then called to end.
 <br /> <br />
 
-# RESULTS: <br/>[Back to Top](#description)
+# RESULTS:
+
+<br/>[Back to Top](#description)
 
 ### Test case 1:
 

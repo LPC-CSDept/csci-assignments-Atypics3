@@ -51,7 +51,9 @@ The registers and settings that are going to be used are as follows:
 - Enable Delayed Loads `OFF`
 - Load Exception Handler `ON`
 
-# ALGORITHM: <br/>[Back to Top](#description)
+# ALGORITHM:
+
+<br/>[Back to Top](#description)
 
 - Using C++ and pseudocode, the algorithm for the program goes like this:
 
@@ -104,7 +106,9 @@ kdone:
 
 <br /> <br />
 
-# EXPLANATION: <br/>[Back to Top](#description)
+# EXPLANATION:
+
+<br/>[Back to Top](#description)
 
 ### header:
 
@@ -241,7 +245,9 @@ Finally, we return back to the Exception Program Counter after the instructions 
 
 <br/> <br/>
 
-# RESULTS: <br/>[Back to Top](#description)
+# RESULTS:
+
+<br/>[Back to Top](#description)
 
 ### Test case 1:
 
